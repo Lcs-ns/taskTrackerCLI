@@ -1,5 +1,4 @@
-import java.util.Scanner;
-import com.google.gson.Gson;
+import java.util.List;
 
 public class TaskCLIApp {
     public static void main(String[] args) {
