@@ -45,7 +45,7 @@ public class Task {
 
     public static Task fromJson(String json) {
         json = json.replace("{", "").replace("}", "").replace("\"", "");
-        String json1 = json.split(",");
+        String[] json1 = json.split(",");
 
         String id = json1[0].split(":")[1].strip();
         String description = json1[1].split(":")[1].strip();
@@ -53,7 +53,7 @@ public class Task {
         String createdAtStr = json1[3].split("[a-z]:")[1].strip();
         String updatedAtStr = json1[4].split("[a-z]:")[1].strip();
 
-        Status status = Status.valueOf(statusString.toUpperCase().replac(" ", "_"));
+        Status status = Status.valueOf(statusString.toUpperCase().replace(" ", "_"));
 
         Task task = new Task(description);
         task.id = Integer.parseInt(id);

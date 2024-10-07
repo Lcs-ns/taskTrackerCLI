@@ -9,21 +9,25 @@ public class Manager {
     private final Path FILE_PATH = Path.of("tasks.json");
     private List<Task> tasks;
 
-    public Manager() {
+
+    public Manager(){
         this.tasks = loadTasks();
     }
 
-    private  List<Task> loadTasks(){
-        if (!File.exists(FILE_PATH)){
+    /* read tasks.json file */
+    private List<Task> loadTasks(){
+        List<Task> stored_tasks = new ArrayList<>();
+
+        if (!Files.exists(FILE_PATH)){
             return new ArrayList<>();
         }
 
         try {
             String jsonContent = Files.readString(FILE_PATH);
             String[] taskList = jsonContent.replace("[", "")
-                    .replace("]", "")
-                    .split("},");
-            for (Strig taskJson : taskList){
+                                            .replace("]", "")
+                                            .split("},");
+            for (String taskJson : taskList){
                 if (!taskJson.endsWith("}")){
                     taskJson = taskJson + "}";
                     stored_tasks.add(Task.fromJson(taskJson));
@@ -31,7 +35,7 @@ public class Manager {
                     stored_tasks.add(Task.fromJson(taskJson));
                 }
             }
-        } catch (IOExeption e) {
+        } catch (IOException e){
             e.printStackTrace();
         }
         return stored_tasks;
@@ -39,8 +43,8 @@ public class Manager {
 
     public void saveTasks(){
         StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        for (int i = 0; i < tasks.size(); i++) {
+        sb.append("[\n");
+        for (int i = 0; i < tasks.size(); i++){
             sb.append(tasks.get(i).toJson());
             if (i < tasks.size() - 1){
                 sb.append(",\n");
@@ -51,25 +55,49 @@ public class Manager {
         String jsonContent = sb.toString();
         try {
             Files.writeString(FILE_PATH, jsonContent);
-        } catch (IOException e) {
+        } catch (IOException e){
             e.printStackTrace();
         }
     }
 
     public void addTask(String description){
-        Task task = findTask(id).orElseThrow(() -> new IllegalArgumentExeption("Task with ID " + id + " not found"));
+        Task new_task = new Task(description);
+        tasks.add(new_task);
+        System.out.println("Task added successfully (ID: " + new_task.getId() + ")");
+    }
+
+    public void updateTask(String id, String new_description){
+        Task task = findTask(id).orElseThrow(() -> new IllegalArgumentException("Task with ID " + id + " not found!"));
         task.updateDescription(new_description);
     }
-    public void upadteTask(String description){}
-    public void deleteTask(String description){}
+
+    public void deleteTask(String id){
+        Task task = findTask(id).orElseThrow(() -> new IllegalArgumentException("Task with ID " + id + " not found!"));
+        tasks.remove(task);
+    }
+
+    public void markInProgress(String id){
+        Task task = findTask(id).orElseThrow(() -> new IllegalArgumentException("Task with ID " + id + " not found!"));
+        task.markInProgress();
+    }
+
+    public void markDone(String id){
+        Task task = findTask(id).orElseThrow(() -> new IllegalArgumentException("Task with ID " + id + " not found!"));
+        task.markDone();
+    }
 
     public void listTasks(String type){
-        for (Task task: tasks) {
+        for (Task task : tasks){
             String status = task.getStatus().toString().strip();
+            if (type.equals("All") || status.equals(type)){
+                System.out.println(task.toString());
+            }
         }
     }
 
-    public Optional<Task> findTask(String id){
+    public Optional<Task> findTask(String id) {
         return tasks.stream().filter((task) -> task.getId() == Integer.parseInt(id)).findFirst();
     }
+
+
 }
